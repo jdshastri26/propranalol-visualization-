@@ -1,0 +1,29 @@
+from rdkit import Chem
+from rdkit.Chem import Draw
+
+# Propranolol SMILES
+propranolol_smiles = "CC(C)NCC(O)COc1cccc2ccccc12"
+propranolol = Chem.MolFromSmiles(propranolol_smiles)
+
+# Define substructures to search for
+substructures = {
+    "Aromatic Ring": Chem.MolFromSmarts("c1ccccc1"),  # Benzene ring
+    "Alcohol Group": Chem.MolFromSmarts("[CX4][OH]"),  # Aliphatic alcohol
+    "Amine Group": Chem.MolFromSmarts("[NX3;H2,H1;!$(NC=O)]"),  # Primary/secondary amine
+    "Ether Group": Chem.MolFromSmarts("[OD2]([CX4])[CX4]"),  # Ether (R-O-R')
+    "Phenol Group": Chem.MolFromSmarts("c1ccc(O)cc1")  # Phenol (aromatic -OH)
+}
+
+# Find substructure matches and visualize
+highlight_atoms = []
+highlight_colors = {}
+
+for i, (name, sub) in enumerate(substructures.items()):
+    match = propranolol.GetSubstructMatch(sub)
+    if match:  # Add matched atoms to the highlight list
+        highlight_atoms.extend(match)
+        highlight_colors.update({atom_idx: (0.2 * i, 0.5, 0.8) for atom_idx in match})  # Unique color per group
+
+# Visualize the molecule with highlights
+img = Draw.MolToImage(propranolol, highlightAtoms=highlight_atoms, highlightAtomColors=highlight_colors)
+img.show()
